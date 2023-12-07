@@ -1,0 +1,71 @@
+---
+import Layout from "../layouts/Layout.astro";
+---
+
+<Layout title="Podimo Podcast ID Finder">
+  <main class="m-0 flex p-0">
+    <form id="urlForm">
+      <input type="text" name="podcast-id" id="podcast-id" placeholder="Type the name of the Podcast here.." class="w-full rounded-sm p-4 text-black" />
+      <input type="submit" />
+    </form>
+  </main>
+</Layout>
+
+<script>
+  const form = document.querySelector("form");
+
+  function createMessageBox(status: string, text: string) {
+    // Remove existing message-box if it exists
+    const existingMessageBox = document.querySelector(".message-box");
+    if (existingMessageBox) {
+      existingMessageBox.parentNode.removeChild(existingMessageBox);
+    }
+
+    // Create a new message-box
+    const messageBox = document.createElement("div");
+    messageBox.classList.add("message-box");
+    const messageContent = document.createTextNode(text);
+    messageBox.appendChild(messageContent);
+
+    // Insert the new message-box after the form
+    form.after(messageBox);
+  }
+
+  document.addEventListener("DOMContentLoaded", () => {
+    form.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      let podcastName = (document.getElementById("podcast-id") as HTMLInputElement).value;
+
+      podcastName = podcastName
+        .replace(/[\s-]+/g, "-")
+        .replace(/[^a-zA-Z0-9-]/g, "")
+        .toLowerCase();
+
+      if (!podcastName) {
+        createMessageBox("error", "Please fill in a Podcast name");
+        return;
+      }
+      console.log(podcastName);
+
+      try {
+        const response = await fetch(`https://podimo.com/nl/shows/${podcastName}`);
+
+        if (!response.ok) {
+          throw new Error("Network response was not ok");
+        }
+
+        const result = await response.text();
+        // const regex = /<link rel="canonical" href="([^"]+)"/i;
+        const match = result.match(/<link rel="canonical" href="([^"]+)"/i);
+
+        if (match && match[1]) {
+          console.log("Podimo Podcast ID:", match[1].split("/shows/")[1] || null);
+        } else {
+          console.log("No canonical link found");
+        }
+      } catch (error) {
+        console.error("Error fetching canonical URL:", error);
+      }
+    });
+  });
+</script>
