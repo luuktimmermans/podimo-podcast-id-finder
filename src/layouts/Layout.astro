@@ -1,5 +1,6 @@
 ---
-import '@fontsource-variable/inter';
+import "@fontsource-variable/space-grotesk";
+
 interface Props {
   title: string;
 }
@@ -17,7 +18,12 @@ const { title } = Astro.props;
     <meta name="generator" content={Astro.generator} />
     <title>{title}</title>
   </head>
-  <body class="bg-black text-white">
+  <body>
     <slot />
+    <style is:global>
+      body {
+        font-family: "Space Grotesk Variable", sans-serif;
+      }
+    </style>
   </body>
 </html>
