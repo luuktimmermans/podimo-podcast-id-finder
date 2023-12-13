@@ -6,4 +6,6 @@ import { defineConfig } from "astro/config";
 export default defineConfig({
   output: "server",
   integrations: [tailwind(), htmx()],
+  site: "https://luuktimmermans.github.io",
+  base: "/podimo-podcast-id-finder",
 });
