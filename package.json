@@ -11,12 +11,14 @@
   },
   "dependencies": {
     "@astrojs/tailwind": "^5.0.3",
+    "@astrojs/vercel": "^7.0.0",
     "@fontsource-variable/space-grotesk": "^5.0.16",
     "astro": "^4.0.3",
     "astro-htmx": "^1.0.3",
     "htmx.org": "^1.9.9",
     "install": "^0.13.0",
     "npm": "^10.2.5",
+    "sass": "^1.70.0",
     "tailwindcss": "^3.3.6"
   },
   "devDependencies": {
