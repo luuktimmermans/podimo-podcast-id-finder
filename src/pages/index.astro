@@ -18,8 +18,8 @@ import Layout from "../layouts/Layout.astro";
           </svg><span>Search<span class="htmx-indicator hidden">ing..</span></span>
         </button>
       </div>
-      <div class="feedback empty:hidden"></div>
     </form>
+    <div class="feedback empty:hidden" id="feedback"></div>
     <a href="https://luuktimmermans.xyz" target="_blank" title="By Luuk Timmermans"
       ><svg class="absolute bottom-4 right-4 fill-gray-300 transition-colors hover:fill-black" width="17" height="30" viewBox="0 0 17 30" fill="none" xmlns="http://www.w3.org/2000/svg">
         <path
@@ -31,19 +31,51 @@ import Layout from "../layouts/Layout.astro";
       </svg>
     </a>
   </main>
+</Layout>
 
-  <style lang="scss">
-    form {
-      &.htmx-request {
-        pointer-events: none;
-        input,
-        button {
-          opacity: 0.5;
-        }
-        .htmx-indicator {
-          display: inline;
+<style lang="scss" is:global>
+  .feedback {
+    button {
+      .icon {
+        content: url("data:image/svg+xml,%3Csvg width='12' height='14' viewBox='0 0 12 14' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M8.60002 10.6V11.8C8.60002 12.1183 8.4736 12.4235 8.24855 12.6485C8.02351 12.8736 7.71828 13 7.40002 13H2.60002C2.28176 13 1.97654 12.8736 1.7515 12.6485C1.52645 12.4235 1.40002 12.1183 1.40002 11.8V5.2C1.40002 4.88174 1.52645 4.57652 1.7515 4.35147C1.97654 4.12643 2.28176 4 2.60002 4H3.80002M3.80002 2.2V9.4C3.80002 9.71826 3.92645 10.0235 4.1515 10.2485C4.37654 10.4736 4.68176 10.6 5.00002 10.6H9.80002C10.1183 10.6 10.4235 10.4736 10.6486 10.2485C10.8736 10.0235 11 9.71826 11 9.4V4.1452C11 3.98534 10.968 3.82709 10.906 3.67975C10.844 3.53241 10.7531 3.39894 10.6388 3.2872L8.64982 1.342C8.42564 1.12279 8.12457 1.00004 7.81102 1H5.00002C4.68176 1 4.37654 1.12643 4.1515 1.35147C3.92645 1.57652 3.80002 1.88174 3.80002 2.2Z' stroke='black' stroke-width='1.2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E%0A");
+        &.copied {
+          content: url("data:image/svg+xml,%3Csvg width='14' height='14' viewBox='0 0 14 14' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M6.02 8.26L4.515 6.755C4.38667 6.62667 4.22333 6.5625 4.025 6.5625C3.82667 6.5625 3.66333 6.62667 3.535 6.755C3.40667 6.88333 3.3425 7.04667 3.3425 7.245C3.3425 7.44333 3.40667 7.60667 3.535 7.735L5.53 9.73C5.67 9.87 5.83333 9.94 6.02 9.94C6.20667 9.94 6.37 9.87 6.51 9.73L10.465 5.775C10.5933 5.64667 10.6575 5.48333 10.6575 5.285C10.6575 5.08667 10.5933 4.92333 10.465 4.795C10.3367 4.66667 10.1733 4.6025 9.975 4.6025C9.77667 4.6025 9.61333 4.66667 9.485 4.795L6.02 8.26ZM7 14C6.03167 14 5.12167 13.8161 4.27 13.4484C3.41833 13.0807 2.6775 12.582 2.0475 11.9525C1.4175 11.3225 0.918867 10.5817 0.5516 9.73C0.184333 8.87833 0.000466667 7.96833 0 7C0 6.03167 0.183867 5.12167 0.5516 4.27C0.919333 3.41833 1.41797 2.6775 2.0475 2.0475C2.6775 1.4175 3.41833 0.918867 4.27 0.5516C5.12167 0.184333 6.03167 0.000466667 7 0C7.96833 0 8.87833 0.183867 9.73 0.5516C10.5817 0.919333 11.3225 1.41797 11.9525 2.0475C12.5825 2.6775 13.0814 3.41833 13.4491 4.27C13.8168 5.12167 14.0005 6.03167 14 7C14 7.96833 13.8161 8.87833 13.4484 9.73C13.0807 10.5817 12.582 11.3225 11.9525 11.9525C11.3225 12.5825 10.5817 13.0814 9.73 13.4491C8.87833 13.8168 7.96833 14.0005 7 14Z' fill='%2300A861'/%3E%3C/svg%3E%0A");
         }
       }
     }
-  </style>
-</Layout>
+  }
+</style>
+
+<style lang="scss">
+  form {
+    &.htmx-request {
+      pointer-events: none;
+      input,
+      button {
+        opacity: 0.5;
+      }
+      .htmx-indicator {
+        display: inline;
+      }
+    }
+  }
+</style>
+
+<script>
+  document.body.addEventListener("click", async (event) => {
+    const target = event.target as HTMLElement;
+    const podcastId = document.getElementById("podcast-id");
+    const icon = document.querySelector(".icon");
+
+    if (target && target.closest(".copy")) {
+      let text = podcastId.innerText;
+
+      await navigator.clipboard.writeText(text);
+      icon.classList.add("copied");
+
+      setTimeout(() => {
+        icon.classList.remove("copied");
+      }, 2000);
+    }
+  });
+</script>

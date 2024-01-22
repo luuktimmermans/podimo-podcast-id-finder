@@ -26,7 +26,7 @@ if (Astro.request.method === "POST") {
       const match = result.match(/<link rel="canonical" href="([^"]+)"/i);
 
       if (match && match[1]) {
-        message = `Podimo Podcast ID: <strong>${match[1].split("/shows/")[1]}</strong>`;
+        message = `Podimo Podcast ID: <button class="font-bold underline copy"><span id="podcast-id">${match[1].split("/shows/")[1]}<span><i class="inline-block object-left w-4 h-4 md:w-5 md:h-5 ml-1 icon"></i></button>`;
       } else {
         message = "Please enter a valid podcast name or URL.";
         errorClass = "!bg-red-100";
