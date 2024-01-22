@@ -2,16 +2,16 @@
 import Layout from "../layouts/Layout.astro";
 ---
 
-<Layout title="Podimo Podcast ID Finder">
+<Layout title="Podimo Podcast ID Finder" description="Find a Podimo Podcast ID by name or URL.">
   <main class="mx-auto mt-24 flex max-w-3xl flex-col justify-center gap-4 p-4 text-center sm:mt-48">
-    <h1 class="bold text-5xl font-bold">Podimo Podcast ID Finder</h1>
-    <p class="text-lg text-gray-400">Enter the Podimo postcast name or URL and find its ID.</p>
+    <h1 class="bold text-3xl font-bold md:text-5xl">Podimo Podcast ID Finder</h1>
+    <p class="text-md text-gray-400 md:text-lg">Enter the Podimo postcast name or URL and find its ID.</p>
     <form method="POST" class="mt-8" hx-post="/podcast" hx-target=".feedback">
       <div class="flex rounded-full bg-[#794cf8] p-2 shadow-md">
         <label class="w-full" for="q">
-          <input type="text" name="q" placeholder="Enter name or URL.." class="w-full appearance-none text-ellipsis rounded-full bg-transparent p-4 text-white placeholder-white outline-none transition-all" autocomplete="off" required />
+          <input type="text" name="q" placeholder="Enter name or URL.." class="w-full appearance-none text-ellipsis rounded-full bg-transparent p-4 text-sm text-white placeholder-white placeholder-opacity-50 outline-none transition-all md:text-lg" autocomplete="off" required />
         </label>
-        <button class="group inline-flex items-center gap-2 whitespace-nowrap rounded-full bg-black px-8 py-4 text-white transition-colors hover:bg-white hover:text-black"
+        <button class="group inline-flex items-center gap-2 whitespace-nowrap rounded-full bg-black px-8 py-4 text-sm text-white transition-colors hover:bg-white hover:text-black md:text-lg"
           ><svg class="htmx-indicator hidden h-5 w-5 animate-spin text-white group-hover:text-black" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
             <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
