@@ -7,5 +7,9 @@ import { defineConfig } from "astro/config";
 export default defineConfig({
   output: "server",
   integrations: [tailwind(), htmx()],
-  adapter: vercel(),
+  adapter: vercel({
+    webAnalytics: {
+      enabled: true,
+    },
+  }),
 });
