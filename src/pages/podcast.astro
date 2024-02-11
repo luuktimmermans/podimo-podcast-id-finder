@@ -6,16 +6,17 @@ if (Astro.request.method === "POST") {
   try {
     const data = await Astro.request.formData();
     let podcastName = data.get("q") as string;
-    podcastName = podcastName
-      .replace(/[^a-zA-Z0-9\s]/g, "")
-      .replace(/-/g, "")
-      .toLowerCase()
-      .replace(/\s+/g, "-");
 
     if (/^https?:\/\//.test(podcastName)) {
       const url = new URL(podcastName);
       podcastName = url.pathname.split("/").pop() || "";
     }
+
+    podcastName = podcastName
+      .replace(/[^a-zA-Z0-9\s]/g, "")
+      .replace(/-/g, "")
+      .toLowerCase()
+      .replace(/\s+/g, "-");
 
     if (!podcastName) {
       message = "Please enter a valid podcast name or URL.";
@@ -23,10 +24,18 @@ if (Astro.request.method === "POST") {
     } else {
       const response = await fetch(`https://podimo.com/nl/shows/${podcastName}`);
       const result = await response.text();
-      const match = result.match(/<link rel="canonical" href="([^"]+)"/i);
+      const match = result.match(/<script id="__NEXT_DATA__" type="application\/json">(.*?)<\/script>/s);
 
       if (match && match[1]) {
-        message = `Podimo Podcast ID: <button class="font-bold underline copy"><span id="podcast-id">${match[1].split("/shows/")[1]}<span><i class="inline-block object-left w-4 h-4 md:w-5 md:h-5 ml-1 icon"></i></button>`;
+        const jsonData = JSON.parse(match[1]);
+        const podcastId = jsonData.props.pageProps.podcastDataBySlug?.id || jsonData.props.pageProps.podcastDataById?.id;
+
+        if (podcastId) {
+          message = `Podimo Podcast ID: <button class="font-bold underline copy"><span id="podcast-id">${podcastId}<span><i class="inline-block object-left w-4 h-4 md:w-5 md:h-5 ml-1 icon"></i></button>`;
+        } else {
+          message = "Podcast ID not found. Please enter a valid podcast name or URL.";
+          errorClass = "!bg-red-100";
+        }
       } else {
         message = "Please enter a valid podcast name or URL.";
         errorClass = "!bg-red-100";
