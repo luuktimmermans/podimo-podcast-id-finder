@@ -17,7 +17,6 @@
     "astro": "^4.0.3",
     "astro-htmx": "^1.0.3",
     "htmx.org": "^1.9.9",
-    "install": "^0.13.0",
     "sass": "^1.70.0",
     "tailwindcss": "^3.3.6"
   },
