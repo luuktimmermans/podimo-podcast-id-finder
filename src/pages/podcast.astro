@@ -1,6 +1,12 @@
 ---
+import Image from "astro/components/Image.astro";
+
 let message: string;
 let errorClass: string;
+let title: string;
+let description: string;
+let authorName: string;
+let coverImageUrl: string;
 
 if (Astro.request.method === "POST") {
 	try {
@@ -16,7 +22,6 @@ if (Astro.request.method === "POST") {
 				.toLowerCase()
 				.replace(/\s+/g, "-");
 		}
-		console.log(podcastName);
 		if (!podcastName) {
 			message = "Please enter a valid podcast name or URL.";
 			errorClass = "!bg-red-100";
@@ -27,11 +32,14 @@ if (Astro.request.method === "POST") {
 
 			if (match && match[1]) {
 				const jsonData = JSON.parse(match[1]);
-				console.log(jsonData.props.pageProps.podcastData.id);
 				const podcastId = jsonData.props.pageProps.podcastData.id;
+				title = jsonData.props.pageProps.podcastData.title;
+				description = jsonData.props.pageProps.podcastData.description;
+				authorName = jsonData.props.pageProps.podcastData.authorName;
+				coverImageUrl = jsonData.props.pageProps.podcastData.images.coverImageUrl;
 
 				if (podcastId) {
-					message = `Podimo Podcast ID: <button class="font-bold underline copy"><span id="podcast-id">${podcastId}<span><i class="inline-block object-left w-4 h-4 md:w-5 md:h-5 ml-1 icon"></i></button>`;
+					message = `Podimo Podcast ID: <button class="font-bold underline copy supports-[hover]:hover:decoration-transparent transition-all"><span id="podcast-id">${podcastId}<span><i class="inline-block object-left w-4 h-4 md:w-5 md:h-5 ml-1 icon"></i></button>`;
 				} else {
 					message = "Podcast ID not found. Please enter a valid podcast name or URL.";
 					errorClass = "!bg-red-100";
@@ -50,4 +58,21 @@ if (Astro.request.method === "POST") {
 export const partial = true;
 ---
 
-<div class=`rounded-lg bg-gray-200 p-4 mt-8 text-sm md:text-lg text-black text-lg ${errorClass}` hx-boost="true" set:html={message} />
+<div class=`grid gap-4 rounded-lg bg-gray-200 p-4 mt-4 text-black ${errorClass}` hx-boost="true">
+	{errorClass && <Fragment set:html={message} />}
+	{
+		!errorClass && (
+			<>
+				<div class="rounded-md bg-black p-4 text-sm text-white md:text-lg" set:html={message} />
+				<div class="flex flex-col items-start gap-4 sm:flex-row">
+					<Image src={coverImageUrl} alt="" width="160" height="160" class="shrink-0 rounded-md max-sm:w-full" />
+					<div class="grid gap-2 text-left">
+						<strong class="text-sm leading-tight md:text-lg md:leading-tight">{title}</strong>
+						<p class="text-xs text-gray-400 md:text-sm">By {authorName}</p>
+						<p class="line-clamp-3 text-sm md:text-base">{description}</p>
+					</div>
+				</div>
+			</>
+		)
+	}
+</div>
