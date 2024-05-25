@@ -39,7 +39,7 @@ if (Astro.request.method === "POST") {
 				coverImageUrl = jsonData.props.pageProps.podcastData.images.coverImageUrl;
 
 				if (podcastId) {
-					message = `Podimo Podcast ID: <button class="font-bold underline copy supports-[hover]:hover:decoration-transparent transition-all"><span id="podcast-id">${podcastId}<span><i class="inline-block object-left w-4 h-4 md:w-5 md:h-5 ml-1 icon"></i></button>`;
+					message = `Podimo Podcast ID: <button class="font-bold underline copy hover:decoration-transparent transition-all"><span id="podcast-id">${podcastId}<span><i class="inline-block object-left w-4 h-4 md:w-5 md:h-5 ml-1 icon"></i></button>`;
 				} else {
 					message = "Podcast ID not found. Please enter a valid podcast name or URL.";
 					errorClass = "!bg-red-100";
