@@ -9,9 +9,9 @@ import Layout from "../layouts/Layout.astro";
     <form method="POST" class="mt-4" hx-post="/podcast" hx-target=".feedback">
       <div class="flex rounded-full bg-[#794cf8] p-2 shadow-md">
         <label class="w-full" for="q">
-          <input type="text" name="q" placeholder="Enter name or URL.." class="w-full appearance-none text-ellipsis rounded-full bg-transparent p-4 text-sm text-white placeholder-white placeholder-opacity-50 outline-none transition-all md:text-lg" autocomplete="off" required />
+          <input type="text" name="q" placeholder="Enter name or URL.." class="placeholder-opacity-50 w-full appearance-none rounded-full bg-transparent p-4 text-sm text-ellipsis text-white placeholder-white transition-all outline-none md:text-lg" autocomplete="off" required />
         </label>
-        <button class="group inline-flex items-center gap-2 whitespace-nowrap rounded-full bg-black px-6 py-4 text-sm text-white transition-colors hover:bg-white hover:text-black md:px-8 md:text-lg"
+        <button class="group inline-flex cursor-pointer items-center gap-2 rounded-full bg-black px-6 py-4 text-sm whitespace-nowrap text-white transition-colors hover:bg-white hover:text-black md:px-8 md:text-lg"
           ><svg class="htmx-indicator hidden h-5 w-5 animate-spin text-white group-hover:text-black" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
             <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
@@ -20,7 +20,7 @@ import Layout from "../layouts/Layout.astro";
       </div>
     </form>
     <div class="feedback empty:hidden" id="feedback"></div>
-    <a href="https://luuk.timmermans.lt" target="_blank" title="By Luuk Timmermans" class="group fixed bottom-4 right-4 max-sm:grid max-sm:h-12 max-sm:w-12 max-sm:place-content-center max-sm:rounded-full max-sm:bg-black/10 max-sm:backdrop-blur-md"
+    <a href="https://luuk.timmermans.lt" target="_blank" title="By Luuk Timmermans" class="group fixed right-4 bottom-4 max-sm:grid max-sm:h-12 max-sm:w-12 max-sm:place-content-center max-sm:rounded-full max-sm:bg-black/10 max-sm:backdrop-blur-md"
       ><svg class="h-auto fill-black/20 transition-colors group-hover:fill-black max-sm:fill-black" width="17" viewBox="0 0 17 30" fill="none" xmlns="http://www.w3.org/2000/svg">
         <path
           d="M6.46703 2.14892C6.42291 2.14892 6.3788 2.13786 6.33468 2.11573C5.56263 1.87229 4.9119 2.45875 4.38249 3.87509C3.91926 5.13652 3.66559 6.48648 3.62147 7.92495C3.53324 11.7535 4.2722 15.7259 5.83836 19.8422C6.38982 18.0053 6.81997 16.1243 7.12879 14.1989C7.45967 12.2736 7.63614 10.6691 7.65819 9.38556C7.68025 7.85856 7.53687 6.27624 7.22805 4.63859C7.02952 3.57633 6.78688 2.77964 6.50012 2.24851L6.46703 2.14892ZM0.279593 28.5726C0.279593 28.2849 0.378856 28.0525 0.577384 27.8755C1.83472 26.8796 2.98177 25.5407 4.01853 23.8588C3.42294 22.7523 2.92662 21.5462 2.52957 20.2405C1.47076 16.766 1.0737 13.0039 1.33841 8.95401C1.4487 7.40489 1.77958 5.78937 2.33104 4.10746C2.70604 3.0452 3.11412 2.19318 3.55529 1.5514C4.17294 0.666189 4.87881 0.15719 5.67292 0.0244085C6.40085 -0.0862433 7.01849 0.179321 7.52584 0.821102C8.80524 1.48501 9.58832 2.75751 9.87508 4.63859C10.0295 5.5902 10.0295 7.19465 9.87508 9.45195C9.58832 13.9223 8.59568 18.0607 6.89717 21.8671L6.79791 22.1327C7.5479 23.7924 8.40819 25.3194 9.37877 26.7136C9.53318 26.9571 9.55523 27.2116 9.44494 27.4771C9.62141 27.5878 9.80891 27.6984 10.0074 27.8091C10.206 27.9197 10.3383 28.0857 10.4045 28.307C10.4707 28.5283 10.4486 28.7386 10.3383 28.9377C10.228 29.1369 10.0626 29.2697 9.842 29.3361C9.62141 29.4025 9.41185 29.3803 9.21332 29.2697C7.66922 28.4509 6.32365 27.2669 5.1766 25.7178C3.98544 27.8644 2.65089 29.2697 1.17297 29.9336C0.974439 30.0221 0.764882 30.0221 0.544296 29.9336C0.32371 29.8672 0.1693 29.7234 0.0810654 29.5021C-0.0733448 29.148 -0.00716904 28.8382 0.279593 28.5726Z"
