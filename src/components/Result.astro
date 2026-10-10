@@ -44,14 +44,18 @@ if (q) {
   }
 }
 
-// Letter pairs of a string, used to score how alike two titles are (Dice coefficient)
-const bigrams = (value: string) => {
-  const text = value
+// Lowercase words without accents or punctuation, so "Narco's in Nederland" and "narcos-in-nederland" compare alike
+const simplify = (value: string) =>
+  value
     .toLowerCase()
     .normalize("NFD")
     .replace(/\p{Diacritic}/gu, "")
     .replace(/[^a-z0-9]+/g, " ")
     .trim();
+
+// Letter pairs of a string, used to score how alike two titles are (Dice coefficient)
+const bigrams = (value: string) => {
+  const text = simplify(value);
   return new Set(Array.from({ length: Math.max(text.length - 1, 0) }, (_, i) => text.slice(i, i + 2)));
 };
 
@@ -61,13 +65,25 @@ const similarity = (a: string, b: string) => {
   return first.size + second.size ? (2 * shared) / (first.size + second.size) : 0;
 };
 
-// When nothing matches, suggest the trending podcasts that look most like what was typed
+// Some slugs don't follow the title (e.g. "We Love Nederlands" is we-love-1tgvp3), so an exact title match among the trending podcasts wins.
+// Otherwise suggest the trending podcasts that look most like what was typed
 if (error === "not-found" || error === "invalid") {
   try {
     const trending = await getTrending(locale);
-    const scored = trending.map((item) => ({ item, score: slug ? Math.max(similarity(slug, item.title), similarity(slug, item.slug)) : 0 })).sort((a, b) => b.score - a.score);
-    closeMatch = scored[0]?.score >= 0.3;
-    suggestions = (closeMatch ? scored.map(({ item }) => item) : trending).slice(0, 3);
+    const exactMatch = slug && trending.find((item) => simplify(item.title) === simplify(slug));
+    if (exactMatch) {
+      podcast = await getPodcast(exactMatch.slug, locale);
+      if (podcast) {
+        slug = exactMatch.slug;
+        error = undefined;
+      }
+    }
+
+    if (error) {
+      const scored = trending.map((item) => ({ item, score: slug ? Math.max(similarity(slug, item.title), similarity(slug, item.slug)) : 0 })).sort((a, b) => b.score - a.score);
+      closeMatch = scored[0]?.score >= 0.3;
+      suggestions = (closeMatch ? scored.map(({ item }) => item) : trending).slice(0, 3);
+    }
   } catch (e) {
     console.error(e);
   }
