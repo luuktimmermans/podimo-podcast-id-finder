@@ -1,0 +1,208 @@
+---
+import { getPodcast, getTrending, type Locale, type Podcast, type TrendingPodcast } from "../lib/podimo";
+
+interface Props {
+  q: string;
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const q = Astro.props.q.trim();
+
+let error: "invalid" | "not-found" | "failed";
+let errorMessage: string;
+let podcast: Podcast;
+let slug: string;
+let suggestions: TrendingPodcast[] = [];
+let closeMatch = false;
+
+if (q) {
+  try {
+    if (/^(https?:\/\/)?([\w-]+\.)*podimo\.com\//.test(q)) {
+      const url = new URL(q.replace(/^(?!https?:\/\/)/, "https://"));
+      slug = url.pathname.split("/").filter(Boolean).pop() || "";
+    } else {
+      slug = q
+        .normalize("NFD")
+        .replace(/\p{Diacritic}/gu, "")
+        .replace(/[^a-zA-Z0-9\s-]/g, "")
+        .toLowerCase()
+        .trim()
+        .replace(/[\s-]+/g, "-");
+    }
+
+    if (!slug) {
+      error = "invalid";
+    } else {
+      podcast = await getPodcast(slug, locale);
+      if (!podcast) error = "not-found";
+    }
+  } catch (e) {
+    console.error(e);
+    error = "failed";
+    errorMessage = e.message.startsWith("Podimo") ? e.message : "Something went wrong while talking to Podimo.";
+  }
+}
+
+// Letter pairs of a string, used to score how alike two titles are (Dice coefficient)
+const bigrams = (value: string) => {
+  const text = value
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/\p{Diacritic}/gu, "")
+    .replace(/[^a-z0-9]+/g, " ")
+    .trim();
+  return new Set(Array.from({ length: Math.max(text.length - 1, 0) }, (_, i) => text.slice(i, i + 2)));
+};
+
+const similarity = (a: string, b: string) => {
+  const [first, second] = [bigrams(a), bigrams(b)];
+  const shared = [...first].filter((pair) => second.has(pair)).length;
+  return first.size + second.size ? (2 * shared) / (first.size + second.size) : 0;
+};
+
+// When nothing matches, suggest the trending podcasts that look most like what was typed
+if (error === "not-found" || error === "invalid") {
+  try {
+    const trending = await getTrending(locale);
+    const scored = trending.map((item) => ({ item, score: slug ? Math.max(similarity(slug, item.title), similarity(slug, item.slug)) : 0 })).sort((a, b) => b.score - a.score);
+    closeMatch = scored[0]?.score >= 0.3;
+    suggestions = (closeMatch ? scored.map(({ item }) => item) : trending).slice(0, 3);
+  } catch (e) {
+    console.error(e);
+  }
+}
+
+const errorTitle = { invalid: "That doesn't look like a podcast", "not-found": "No podcast found", failed: "Podimo didn't answer" }[error];
+
+const iconButton = "grid h-8 w-8 shrink-0 cursor-pointer place-content-center rounded-lg text-neutral-500 transition-colors hover:bg-neutral-800 hover:text-white";
+---
+
+{podcast ? (
+  <article class="relative flex h-full animate-rise flex-col justify-between overflow-hidden rounded-2xl border border-neutral-800 bg-neutral-900/50 p-4" data-slug={slug} style={`--cover: ${podcast.coverColor}`}>
+    <div class="pointer-events-none absolute -top-16 -left-16 h-40 w-40 rounded-full bg-(--cover) opacity-25 blur-3xl" />
+    <div class="relative flex items-center gap-3">
+      <img src={podcast.coverImageUrl} alt={`Artwork for ${podcast.title}`} width="64" height="64" class="h-16 w-16 shrink-0 rounded-lg object-cover shadow-lg shadow-black/50" />
+      <div class="grid min-w-0 flex-1">
+        <h2 class="truncate text-lg font-semibold tracking-tight">{podcast.title}</h2>
+        <p class="truncate text-sm text-neutral-400">
+          {podcast.authorName}
+          {podcast.episodeCount > 0 && <span class="before:mx-2 before:text-neutral-700 before:content-['/']">{podcast.episodeCount} episodes</span>}
+        </p>
+      </div>
+      <div class="flex shrink-0 items-center self-start">
+        {podcast.description && (
+          <button class={iconButton} popovertarget="about" title="About this podcast">
+            <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+              <circle cx="12" cy="12" r="10" />
+              <path d="M12 16v-4M12 8h.01" />
+            </svg>
+          </button>
+        )}
+        <a href={podcast.url} target="_blank" rel="noopener" class={iconButton} title="Listen on Podimo">
+          <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M7 17 17 7M7 7h10v10" />
+          </svg>
+        </a>
+        <button class:list={["clear", iconButton]} title="Clear (Esc)">
+          <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+            <path d="M18 6 6 18M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+    </div>
+    <div class="relative flex items-center gap-2 rounded-xl border border-neutral-800 bg-neutral-950 p-1.5 pl-4">
+      <code class="min-w-0 flex-1 truncate font-mono text-[13px] text-white sm:text-[15px]" set:html={podcast.id.split("-").join('<span class="text-neutral-600">-</span>')} />
+      <button class="copy flex shrink-0 cursor-pointer items-center gap-2 rounded-lg bg-lime-300 px-3 py-2 text-sm font-medium text-black transition-all hover:bg-lime-200 active:scale-95" data-copy={podcast.id}>
+        <i class="icon inline-block h-3.5 w-3.5" />
+        <span class="label">Copy</span>
+      </button>
+    </div>
+    {podcast.description && (
+      <div id="about" popover class="m-auto max-h-[70dvh] w-[min(36rem,calc(100vw-2rem))] overflow-y-auto rounded-2xl border border-neutral-800 bg-neutral-900 p-6 text-neutral-300 shadow-2xl backdrop:bg-black/60 backdrop:backdrop-blur-sm">
+        <div class="mb-4 flex items-start justify-between gap-4">
+          <div class="flex min-w-0 items-center gap-3">
+            <img src={podcast.coverImageUrl} alt="" width="40" height="40" class="h-10 w-10 shrink-0 rounded-md object-cover" />
+            <h3 class="truncate font-semibold text-white">{podcast.title}</h3>
+          </div>
+          <button class={iconButton} popovertarget="about" popovertargetaction="hide" title="Close">
+            <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+              <path d="M18 6 6 18M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+        <p class="text-sm leading-relaxed whitespace-pre-line">{podcast.description}</p>
+      </div>
+    )}
+  </article>
+) : error ? (
+  <div class="relative flex h-full animate-rise flex-col justify-between overflow-hidden rounded-2xl border border-neutral-800 bg-neutral-900/50 p-4">
+    <div class="pointer-events-none absolute -top-16 -left-16 h-40 w-40 rounded-full bg-amber-400 opacity-15 blur-3xl" />
+    <div class="relative flex items-center gap-3">
+      <div class="hidden h-16 w-16 shrink-0 items-center justify-center gap-[3px] rounded-lg border border-amber-300/20 bg-neutral-950 sm:flex" aria-hidden="true">
+        {Array.from({ length: 7 }, (_, i) => (
+          <span class="h-5 w-[3px] origin-center animate-[blip_1.6s_ease-in-out_infinite] rounded-full bg-amber-300/70" style={`animation-delay: ${i * 0.12}s`} />
+        ))}
+      </div>
+      <div class="grid min-w-0 flex-1">
+        <h2 class="truncate text-lg font-semibold tracking-tight">{errorTitle}</h2>
+        <p class="flex min-w-0 gap-1 text-sm text-neutral-400">
+          {error === "not-found" && (
+            <>
+              {/* Only the name shrinks, so the sentence stays readable. Small screens drop the icon and "on Podimo" to give the name room */}
+              <span class="shrink-0">Nothing called</span>
+              <span class="min-w-0 truncate font-mono text-amber-200" title={slug}>
+                {slug}
+              </span>
+              <span class="hidden shrink-0 sm:inline">on Podimo</span>
+            </>
+          )}
+          {error === "invalid" && <span class="truncate">Type a podcast name or paste a Podimo link</span>}
+          {error === "failed" && <span class="truncate">{errorMessage}</span>}
+        </p>
+      </div>
+      <button class:list={["clear self-start", iconButton]} title="Clear (Esc)">
+        <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+          <path d="M18 6 6 18M6 6l12 12" />
+        </svg>
+      </button>
+    </div>
+    {error === "failed" ? (
+      <button class="relative flex w-fit cursor-pointer items-center gap-2 rounded-lg bg-white/10 px-3 py-2 text-sm font-medium transition-colors hover:bg-white/15" hx-get="/podcast" hx-vals={JSON.stringify({ q, locale })} hx-target="#result" hx-indicator="#lookup">
+        <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 12a9 9 0 1 1-3-6.7L21 8" />
+          <path d="M21 3v5h-5" />
+        </svg>
+        Try again
+      </button>
+    ) : (
+      suggestions.length > 0 && (
+        <div class="relative flex min-w-0 items-center gap-2">
+          <span class="shrink-0 text-xs text-neutral-500">{closeMatch ? "Did you mean" : "Trending now"}</span>
+          <div class="suggestions flex h-[34px] min-w-0 flex-1 flex-wrap gap-1.5 overflow-clip">
+            {suggestions.map((suggestion) => (
+              <button class="flex shrink-0 cursor-pointer items-center gap-2 rounded-full border border-neutral-800 bg-neutral-950 py-1 pr-3 pl-1 text-sm text-neutral-300 transition-colors hover:border-lime-300/50 hover:text-white" hx-get="/podcast" hx-vals={JSON.stringify({ q: suggestion.slug, locale })} hx-target="#result" hx-indicator="#lookup" data-title={suggestion.title}>
+                <img src={suggestion.coverImageUrl} alt="" width="24" height="24" class="h-6 w-6 rounded-full object-cover" />
+                <span class="max-w-40 truncate">{suggestion.title}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+      )
+    )}
+  </div>
+) : (
+  <div class="flex h-full flex-col justify-between rounded-2xl border border-dashed border-neutral-800 p-4">
+    <div class="flex items-center gap-3">
+      <div class="h-16 w-16 shrink-0 rounded-lg border border-dashed border-neutral-800"></div>
+      <div class="grid min-w-0">
+        <p class="truncate text-lg font-semibold tracking-tight text-neutral-600">Your podcast ID shows up here</p>
+        <p class="truncate text-sm text-neutral-600">Search above, or pick a trending podcast below</p>
+      </div>
+    </div>
+    <div class="flex items-center gap-2 rounded-xl border border-dashed border-neutral-800 p-1.5 pl-4">
+      <code class="min-w-0 flex-1 truncate font-mono text-[13px] text-neutral-700 sm:text-[15px]">xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx</code>
+      <span class="rounded-lg bg-neutral-900 px-3 py-2 text-sm text-neutral-600">Copy</span>
+    </div>
+  </div>
+)}

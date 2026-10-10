@@ -1,5 +1,4 @@
-import vercel from "@astrojs/vercel/serverless";
-import htmx from "astro-htmx";
+import cloudflare from "@astrojs/cloudflare";
 import { defineConfig } from "astro/config";
 
 import tailwindcss from "@tailwindcss/vite";
@@ -7,12 +6,10 @@ import tailwindcss from "@tailwindcss/vite";
 // https://astro.build/config
 export default defineConfig({
   output: "server",
-  integrations: [ htmx()],
+  session: false,
 
-  adapter: vercel({
-    webAnalytics: {
-      enabled: true,
-    },
+  adapter: cloudflare({
+    imageService: "passthrough",
   }),
 
   vite: {

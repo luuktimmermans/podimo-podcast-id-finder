@@ -1,1 +1,59 @@
 @import "tailwindcss";
+
+@theme {
+  --font-sans: "Geist Variable", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "Geist Mono Variable", ui-monospace, monospace;
+
+  --animate-rise: rise 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+
+  /* A "no signal" waveform: each bar briefly spikes, staggered so a small pulse travels across a flat line */
+  @keyframes blip {
+    0%,
+    60%,
+    100% {
+      transform: scaleY(0.15);
+    }
+    30% {
+      transform: scaleY(1);
+    }
+  }
+
+  @keyframes rise {
+    from {
+      opacity: 0;
+      transform: translateY(8px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+}
+
+/* Focus rings only show for keyboard users. Layout.astro sets data-input="keyboard" on <html> on keydown and removes it on pointerdown */
+:focus {
+  outline: none;
+}
+
+html[data-input="keyboard"] :focus:not(input, textarea, [role="listbox"]) {
+  outline: 2px solid var(--color-lime-300);
+  outline-offset: 3px;
+  animation: focus-ring 0.2s ease-out;
+}
+
+@keyframes focus-ring {
+  from {
+    outline-color: transparent;
+    outline-offset: 7px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

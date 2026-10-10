@@ -1,0 +1,44 @@
+---
+import { getRegions, getTrending, resolveLocale, type TrendingPodcast } from "../lib/podimo";
+
+const regions = await getRegions();
+const locale = resolveLocale(regions, Astro.url, Astro.cookies.get("locale")?.value, Astro.request.headers.get("accept-language"));
+
+let trending: TrendingPodcast[] = [];
+
+try {
+  trending = (await getTrending(locale)).slice(0, 12);
+} catch (e) {
+  console.error(e);
+}
+
+Astro.response.headers.set("Cache-Control", "public, max-age=600");
+
+export const partial = true;
+---
+
+{trending.length > 0 ? (
+  <ol class="grid grid-cols-2 gap-x-4 gap-y-8 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6">
+    {trending.map((podcast, index) => (
+      <li class="animate-rise" style={`animation-delay: ${index * 40}ms`}>
+        <button class="group grid w-full cursor-pointer gap-3 rounded-xl text-left" hx-get="/podcast" hx-vals={JSON.stringify({ q: podcast.slug, locale })} hx-target="#result" hx-indicator="#lookup" data-slug={podcast.slug} data-title={podcast.title} title={`Get the ID for ${podcast.title}`}>
+          <span class="relative block overflow-hidden rounded-xl bg-neutral-900 ring-1 ring-white/5 transition-shadow group-data-active:ring-2 group-data-active:ring-lime-300">
+            <img src={podcast.coverImageUrl} alt="" loading="lazy" width="400" height="400" class="aspect-square w-full object-cover transition-all duration-500 group-hover:scale-105 group-hover:opacity-40" />
+            <span class="absolute inset-0 flex items-end bg-linear-to-t from-black/90 via-black/30 to-transparent p-3 opacity-0 transition-opacity group-hover:opacity-100 group-focus-visible:opacity-100">
+              <span class="rounded-full bg-lime-300 px-3 py-1 text-xs font-medium text-black">Get ID →</span>
+            </span>
+          </span>
+          <span class="flex gap-3">
+            <span class="font-mono text-sm text-neutral-600 tabular-nums">{String(index + 1).padStart(2, "0")}</span>
+            <span class="grid min-w-0">
+              <span class="truncate text-sm font-medium text-neutral-200 group-hover:text-white">{podcast.title}</span>
+              <span class="truncate text-xs text-neutral-500">{podcast.authorName}</span>
+            </span>
+          </span>
+        </button>
+      </li>
+    ))}
+  </ol>
+) : (
+  <p class="text-sm text-neutral-500">Couldn't load trending podcasts right now. Search above instead.</p>
+)}

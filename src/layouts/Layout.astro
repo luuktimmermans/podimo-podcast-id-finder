@@ -1,5 +1,6 @@
 ---
-import "@fontsource-variable/outfit";
+import "@fontsource-variable/geist";
+import "@fontsource-variable/geist-mono";
 import "../styles/global.css";
 
 interface Props {
@@ -11,24 +12,25 @@ const { title, description } = Astro.props;
 ---
 
 <!doctype html>
-<html lang="en">
+<html lang="en" class="scheme-dark">
   <head>
     <meta charset="UTF-8" />
     <meta name="description" content={description} />
     <meta name="viewport" content="width=device-width" />
+    <meta name="theme-color" content="#0a0a0a" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="generator" content={Astro.generator} />
     <title>{title}</title>
   </head>
-  <body>
+  <body class="min-h-dvh bg-neutral-950 font-sans text-neutral-100 antialiased selection:bg-lime-300 selection:text-black">
     <slot />
-    <style is:global>
-      body {
-        text-rendering: optimizeSpeed;
-        -webkit-font-smoothing: antialiased;
-        -moz-osx-font-smoothing: grayscale;
-        font-family: "Outfit", sans-serif;
-      }
-    </style>
+    <script>
+      import "htmx.org";
+
+      // Remembers whether the visitor is using a keyboard or a pointer, so focus rings only show for keyboard navigation
+      const root = document.documentElement;
+      addEventListener("keydown", (event) => !event.metaKey && !event.ctrlKey && root.setAttribute("data-input", "keyboard"), true);
+      addEventListener("pointerdown", () => root.removeAttribute("data-input"), true);
+    </script>
   </body>
 </html>
