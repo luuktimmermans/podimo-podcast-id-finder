@@ -23,11 +23,11 @@ const locale = resolveLocale(regions, Astro.url, Astro.cookies.get("locale")?.va
   </header>
 
   <main class="mx-auto max-w-7xl px-6">
-    <section class="grid gap-10 pt-12 pb-10 md:py-24 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)] lg:gap-16">
+    <section class="grid grid-cols-1 gap-10 pt-12 pb-10 md:py-24 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)] lg:gap-16">
       <h1 class="animate-rise text-5xl leading-[0.95] font-semibold tracking-tighter text-balance md:text-7xl">
         Find any Podimo podcast <span class="text-lime-300">ID.</span>
       </h1>
-      <div class="grid min-w-0 animate-rise gap-6 [animation-delay:80ms]">
+      <div class="grid min-w-0 animate-rise grid-cols-1 gap-6 [animation-delay:80ms]">
         <p class="text-neutral-400 md:text-lg">Search by name or paste a Podimo link. You'll get the podcast ID, ready to copy, plus the artwork and description.</p>
         <form action="/" id="search" class="group/form" hx-get="/podcast" hx-target="#result" hx-indicator="#lookup, #search">
           <label for="q" class="flex items-center gap-3 border-b border-neutral-800 pb-3 transition-colors focus-within:border-lime-300">
