@@ -31,7 +31,7 @@ const locale = resolveLocale(regions, Astro.url, Astro.cookies.get("locale")?.va
         <p class="text-neutral-400 md:text-lg">Search by name or paste a Podimo link. You'll get the podcast ID, ready to copy, plus the artwork and description.</p>
         <form action="/" id="search" class="group/form" hx-get="/podcast" hx-target="#result" hx-indicator="#lookup, #search">
           <label for="q" class="flex items-center gap-3 border-b border-neutral-800 pb-3 transition-colors focus-within:border-lime-300">
-            <input type="text" id="q" name="q" placeholder="Search a podcast.." class="w-full min-w-0 appearance-none bg-transparent text-xl text-white placeholder-neutral-600 outline-none md:text-2xl" autocomplete="off" value={q} required />
+            <input type="text" id="q" name="q" placeholder="Search a podcast.." class="w-full min-w-0 appearance-none bg-transparent text-xl text-ellipsis text-white placeholder-neutral-600 placeholder:text-ellipsis outline-none md:text-2xl" autocomplete="off" value={q} required />
             <kbd class="hidden shrink-0 rounded border border-neutral-800 px-1.5 font-mono text-xs text-neutral-500 group-focus-within/form:hidden sm:block">/</kbd>
             <button class="grid h-10 w-10 shrink-0 cursor-pointer place-content-center rounded-full bg-lime-300 text-black transition-all hover:bg-lime-200 active:scale-90" title="Search">
               <svg class="h-5 w-5 group-[.htmx-request]/form:hidden" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
@@ -81,7 +81,7 @@ const locale = resolveLocale(regions, Astro.url, Astro.cookies.get("locale")?.va
               </svg>
             </button>
           </h2>
-          <ul id="region-list" role="listbox" tabindex="-1" aria-label="Podimo region" class="invisible absolute top-full z-30 mt-3 w-56 origin-top-left scale-95 overflow-y-auto data-[side=top]:top-auto data-[side=top]:bottom-full data-[side=top]:mt-0 data-[side=top]:mb-3 data-[side=top]:origin-bottom-left rounded-xl border border-neutral-800 bg-neutral-900/95 p-1 opacity-0 shadow-2xl shadow-black/60 backdrop-blur-xl transition duration-150 outline-none data-open:visible data-open:scale-100 data-open:opacity-100">
+          <ul id="region-list" role="listbox" tabindex="-1" aria-label="Podimo region" class="invisible absolute top-full z-30 mt-3 w-56 origin-top-left scale-95 overflow-y-auto overscroll-contain data-[side=top]:top-auto data-[side=top]:bottom-full data-[side=top]:mt-0 data-[side=top]:mb-3 data-[side=top]:origin-bottom-left rounded-xl border border-neutral-800 bg-neutral-900/95 p-1 opacity-0 shadow-2xl shadow-black/60 backdrop-blur-xl transition duration-150 outline-none data-open:visible data-open:scale-100 data-open:opacity-100">
             {regions.map((region) => (
               <li id={`region-${region.locale}`} role="option" aria-selected={region.locale === locale ? "true" : "false"} data-locale={region.locale} class="group flex cursor-pointer items-center justify-between gap-3 rounded-lg px-3 py-2 text-sm text-neutral-300 transition-colors hover:bg-neutral-800 hover:text-white aria-selected:text-white data-active:bg-neutral-800 data-active:text-white in-data-[input=keyboard]:data-active:bg-lime-300/10 in-data-[input=keyboard]:data-active:text-lime-200 in-data-[input=keyboard]:data-active:ring-1 in-data-[input=keyboard]:data-active:ring-lime-300/40 in-data-[input=keyboard]:data-active:ring-inset">
                 {region.name}
