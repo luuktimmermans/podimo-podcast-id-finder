@@ -31,7 +31,12 @@ const locale = resolveLocale(regions, Astro.url, Astro.cookies.get("locale")?.va
         <p class="text-neutral-400 md:text-lg">Search by name or paste a Podimo link. You'll get the podcast ID, ready to copy, plus the artwork and description.</p>
         <form action="/" id="search" class="group/form" hx-get="/podcast" hx-target="#result" hx-indicator="#lookup, #search">
           <label for="q" class="flex items-center gap-3 border-b border-neutral-800 pb-3 transition-colors focus-within:border-lime-300">
-            <input type="text" id="q" name="q" placeholder="Search a podcast.." class="w-full min-w-0 appearance-none bg-transparent text-xl text-ellipsis text-white placeholder-neutral-600 placeholder:text-ellipsis outline-none md:text-2xl" autocomplete="off" value={q} required />
+            <span class="relative min-w-0 flex-1 text-xl md:text-2xl">
+              <input type="text" id="q" name="q" placeholder="Search a podcast.." class="peer w-full min-w-0 appearance-none bg-transparent text-white placeholder-transparent outline-none" autocomplete="off" value={q} required />
+              <span id="q-placeholder" class="pointer-events-none absolute inset-0 truncate text-neutral-600 peer-not-placeholder-shown:hidden" aria-hidden="true">
+                Search a podcast..
+              </span>
+            </span>
             <kbd class="hidden shrink-0 rounded border border-neutral-800 px-1.5 font-mono text-xs text-neutral-500 group-focus-within/form:hidden sm:block">/</kbd>
             <button class="grid h-10 w-10 shrink-0 cursor-pointer place-content-center rounded-full bg-lime-300 text-black transition-all hover:bg-lime-200 active:scale-90" title="Search">
               <svg class="h-5 w-5 group-[.htmx-request]/form:hidden" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
@@ -135,6 +140,7 @@ const locale = resolveLocale(regions, Astro.url, Astro.cookies.get("locale")?.va
   import htmx from "htmx.org";
 
   const input = document.querySelector<HTMLInputElement>("#q");
+  const placeholder = document.querySelector<HTMLElement>("#q-placeholder");
   const localeInput = document.querySelector<HTMLInputElement>("#locale");
   const localeField = document.querySelector<HTMLInputElement>("#search [name=locale]");
   const lookup = document.getElementById("lookup");
@@ -375,7 +381,7 @@ const locale = resolveLocale(regions, Astro.url, Astro.cookies.get("locale")?.va
       let index = 0;
       clearInterval(placeholderTimer);
       placeholderTimer = setInterval(() => {
-        input.placeholder = `Try “${titles[index++ % titles.length]}”`;
+        input.placeholder = placeholder.textContent = `Try “${titles[index++ % titles.length]}”`;
       }, 2500);
     }
   });
